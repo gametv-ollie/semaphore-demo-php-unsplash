@@ -6,6 +6,7 @@ blocks:
       jobs:
         - name: Build
           commands:
+            - checkout
             - >-
               echo "$DOCKER_PASSWORD" | docker login  --username
               "$DOCKER_USERNAME" --password-stdin
@@ -26,3 +27,6 @@ agent:
   machine:
     type: e1-standard-2
     os_image: ubuntu1804
+promotions:
+  - name: Deploy to Heroku
+    pipeline_file: pipeline_3.yml

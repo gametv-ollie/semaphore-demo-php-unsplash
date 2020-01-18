@@ -1,0 +1,38 @@
+version: v1.0
+name: Deploy to Heroku
+blocks:
+  - name: Deploy
+    task:
+      jobs:
+        - name: Deploy
+          commands:
+            - checkout
+            - >-
+              echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}"
+              --password-stdin
+            - >-
+              docker pull
+              "$DOCKER_USERNAME"/semaphore-demo-php-unsplash:$SEMAPHORE_WORKFLOW_ID
+            - 'heroku container:login'
+            - >-
+              docker tag
+              "$DOCKER_USERNAME"/semaphore-demo-php-unsplash:$SEMAPHORE_WORKFLOW_ID
+              registry.heroku.com/$HEROKU_APP/web
+            - 'docker push registry.heroku.com/$HEROKU_APP/web            '
+            - 'heroku config:set UNSPLASH_ACCESS_KEY=$UNSPLASH_ACCESS_KEY'
+            - 'heroku config:set UNSPLASH_SECRET_KEY=$UNSPLASH_SECRET_KEY'
+            - 'heroku config:set APP_ENV=production'
+            - 'heroku config:set APP_KEY=qiRKsBnNoFwwOo77rDVJbK1N6IQyBKHf'
+            - 'heroku stack:set container --app $HEROKU_APP'
+            - 'heroku container:release web --app $HEROKU_APP'
+      secrets:
+        - name: dockerhub
+        - name: heroku
+        - name: unsplash
+      env_vars:
+        - name: HEROKU_APP
+          value: semaphore-demo-php-unsplash
+agent:
+  machine:
+    type: e1-standard-2
+    os_image: ubuntu1804
